@@ -32,6 +32,14 @@ one = Fun $ \c -> return $ Fun $ \ll -> apply ll $
 
 main :: IO ()
 main = do
+	fun <- getContents >>= makeZot
+	funOut <- apply fun =<< output
+	apply funOut pr
+	putStrLn ""
+	
+
+main_ :: IO ()
+main_ = do
 	apply i ( Int 3 ) >>= print
 	ii <- makeZot "100"
 	apply ii ( Int 3 ) >>= print
