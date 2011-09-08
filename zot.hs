@@ -31,6 +31,17 @@ main = do
 	print $ interrogate output $$ Int 0 $$ Int 1 $$ Int 2
 	pr one
 	pr zero
+	print testRev
+	print $ makeZotFromStr "10100" $$ Int 3 $$ Int 4
+
+lst :: Fun
+lst = Fun $ \f -> ( \g -> i $$ ( g $$ one ) ) ( f $$ zero )
+
+{-
+readList :: Fun -> [ Fun ]
+readList l = if isNull l then [ ] else
+	l k
+-}
 
 testSKI :: Fun
 testSKI = apply ( apply ( apply s k ) ( Int 8 ) ) $ Int 4
@@ -39,6 +50,8 @@ testZot :: Fun
 testZot = apply ( apply ( makeZotFromStr "11010100100" ) $ Int 5 ) $ Int 7
 
 testZot2 = apply ( makeZotFromStr skk ) $ Int 3
+
+testRev = makeZotFromStr ( rev ++ "1101000" )
 
 app :: String -> String -> String
 app f a = '1' : f ++ a
