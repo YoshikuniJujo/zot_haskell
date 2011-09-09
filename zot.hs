@@ -1,6 +1,7 @@
 {-# LANGUAGE PackageImports #-}
 
 import "monads-tf" Control.Monad.State
+import Data.Char
 
 data Fun = Fun { apply_ :: Fun -> IO Fun } | Int Int
 
@@ -30,9 +31,12 @@ one = Fun $ \c -> return $ Fun $ \ll -> apply ll $
 		lr <- apply l r
 		apply c lr
 
+remCom :: String -> String
+remCom = unlines . map ( takeWhile ( /= '#' ) ) . lines
+
 main :: IO ()
 main = do
-	fun <- getContents >>= makeZot
+	fun <- getContents >>= makeZot . filter ( not . isSpace ) . remCom
 	funOut <- apply fun =<< output
 	apply funOut pr
 	putStrLn ""
@@ -64,6 +68,16 @@ main_ = do
 	rvo <- apply rv =<< output
 	apply rvo pr
 	putStrLn ""
+	lst10f <- lst10''
+	apply lst10f pr
+	putStrLn ""
+	lst10f <- lst10'
+--	lst10fo <- apply lst10f =<< output
+	apply lst10f pr
+	putStrLn ""
+	kif <- ioki
+	kif3 <- apply kif ( Int 3 )
+	apply kif3 ( Int 5 ) >>= print
 
 ($$) :: Fun -> Fun -> IO Fun
 f $$ a = apply f a
@@ -95,6 +109,36 @@ lst10 = Fun $ \f -> do
 --	( \g -> g zero )
 	f1 <- apply f one
 	apply f1 zero
+
+ioki :: IO Fun
+ioki = makeZot "110100100"
+
+iok1 :: IO Fun
+iok1 = makeZot "1101001"
+
+lst10' :: IO Fun
+lst10' = makeZot $ skiToZot "``s``si`k0`k1"
+-- lst10' = makeZot $ skiToZot "``si`k1"
+-- lst10' = makeZot "1 1 101010100 1 1 101010100 100 1 1010100 1 1 1010100 0"
+-- lst10' = makeZot "11101010100100110101001"
+
+skiToZot :: String -> String
+skiToZot ""		= ""
+skiToZot ( '`' : rest )	= '1' : skiToZot rest
+skiToZot ( 's' : rest ) = "101010100" ++ skiToZot rest
+skiToZot ( 'k' : rest ) = "1010100" ++ skiToZot rest
+skiToZot ( 'i' : rest ) = "100" ++ skiToZot rest
+skiToZot ( '1' : rest ) = "1" ++ skiToZot rest
+skiToZot ( '0' : rest ) = "0" ++ skiToZot rest
+
+lst10'' :: IO Fun
+lst10'' = do
+	si <- apply s i
+	k1 <- apply k one
+	k0 <- apply k zero
+	sik1 <- apply si k1
+	ssik1 <- apply s sik1
+	apply ssik1 k0
 
 interrogate :: Fun -> IO Fun
 interrogate f = do
