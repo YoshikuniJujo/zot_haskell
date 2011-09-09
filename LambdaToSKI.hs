@@ -66,6 +66,7 @@ parsePars = ( spot ( isLower . head ) `build` (:[]) ) `alt`
 		( \( x, xs ) -> x : xs ) )
 
 lexer :: String -> [ String ]
+lexer "\n"			= [ ]
 lexer ""			= [ ]
 lexer ( '\\' : rest )		= "\\" : lexer rest
 lexer ( '-' : '>' : rest )	= "->" : lexer rest

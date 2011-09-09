@@ -12,3 +12,9 @@
 \f -> f one
 => S I ( K one )
 => 1 1 101010100 100 1 1010100 1
+
+echo -n 'lambda expression' | runhaskell lambdaToSKI.hs | \
+runhaskell skiToZot.hs | runhaskell addEcho.hs arg | runhaskell zot.hs
+
+cat flipPrint.lambda| runhaskell lambdaToSKI.hs| runhaskell skiToZot.hs | \
+runhaskell addEcho.hs 10 | runhaskell zot.hs
