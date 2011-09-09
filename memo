@@ -18,3 +18,25 @@ runhaskell skiToZot.hs | runhaskell addEcho.hs arg | runhaskell zot.hs
 
 cat flipPrint.lambda| runhaskell lambdaToSKI.hs| runhaskell skiToZot.hs | \
 runhaskell addEcho.hs 10 | runhaskell zot.hs
+
+reverse:
+( \x -> x x ( \x -> x ) ) ( \self -> \remainder -> \c ->
+interrogate c ( self self ) ( self self ) ( \print -> remainder ( print c ) ) )
+
+reverse 1 0 1 1
+
+self = \s r c -> int c ( s s ) ( s s ) $ \p -> r $ p c
+
+( \x -> x x ( \x -> x ) ) self 1 0 1 1
+=> ( \x -> x x I ) self 1 0 1 1
+=> self self I 1 0 1 1
+=> ( \s r c -> int c ( s s ) ( s s ) $ \p -> r $ p c ) self I 1 0 1 1
+=> int 1 ( self self ) ( self self ) $ \p -> p 1 ) 0 1 1
+=> self self ( \p -> p 1 ) 0 1 1
+=> ( \s r c -> int c ( s s ) ( s s ) $ \p -> r $ p c ) self ( \p -> p 1 ) 0 1 1
+=> int 0 ( self self ) ( self self ) $ \p -> ( \p -> p 1 ) $ p 0 ) 1 1
+=> self self ( \p -> p 0 1 ) 1 1
+=> self self ( \p -> p 1 0 1 ) 1
+=> self self ( \p -> p 1 1 0 1 ) output
+=> \p -> ( \p -> p 1 1 0 1 ) $ p output
+=> \p -> p output 1 1 0 1

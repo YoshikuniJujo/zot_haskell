@@ -39,6 +39,7 @@ main = do
 	fun <- getContents >>= makeZot . filter ( not . isSpace ) . remCom
 	funOut <- apply fun =<< output
 	apply funOut pr
+--	apply fun pr
 	putStrLn ""
 	
 

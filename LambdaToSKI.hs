@@ -15,6 +15,8 @@ churchTwo =
 
 lambdaToSKI :: Lambda -> Lambda
 lambdaToSKI ( Fun x e ) = out x e
+lambdaToSKI ( Apply f a ) = Apply ( lambdaToSKI f ) ( lambdaToSKI a )
+lambdaToSKI nf = error $ "lambdaToSKI error: " ++ show nf
 
 out :: String -> Lambda -> Lambda
 out x0 ( Var x1 )
@@ -71,6 +73,7 @@ lexer ""			= [ ]
 lexer ( '\\' : rest )		= "\\" : lexer rest
 lexer ( '-' : '>' : rest )	= "->" : lexer rest
 lexer ( ' ' : rest )		= lexer rest
+lexer ( '\n' : rest )		= lexer rest
 lexer ( '(' : rest )		= "(" : lexer rest
 lexer ( ')' : rest )		= ")" : lexer rest
 lexer ca@( c : _ )
