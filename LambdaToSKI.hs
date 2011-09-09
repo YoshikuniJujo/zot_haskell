@@ -30,19 +30,25 @@ out :: String -> Lambda -> Lambda
 out x0 ( Var x1 )
 	| x1 == x0	= I
 	| otherwise	= Apply K $ Var x1
+{-
 out x0 ( Apply f ( Var x1 ) )
 	| x1 == x0 && notHave x0 f	= f
+-}
 out x0 ( Apply f a )	= Apply ( Apply S  $ out x0 f ) $ out x0 a
 out x0 ( Fun x1 e )
 	| x0 == x1	= Apply K $ out x0 e
 	| otherwise	= ( out x0 ) $ out x1 e
-out x0 ski		= Apply K $ ski
+out x0 S		= Apply K S
+out x0 K		= Apply K K
+out x0 I		= Apply K I
+-- out x0 ski		= Apply K $ ski
 
 showApply :: Lambda -> String
 showApply S = "s"
 showApply K = "k"
 showApply I = "i"
 showApply ( Apply f a ) = "`" ++ showApply f ++ showApply a
+showApply other = show other
 
 showSKI = showApply . lambdaToSKI
 

@@ -4,7 +4,8 @@ rev = "1111010101001110101010010011010100100100111010101001110101010011010100101
 
 test = "11010101001010100"
 
-main = putStrLn $ zotToSKI $ ( replicate 1 '1' ++ ) $ concat $ replicate 2 rev
+-- main = putStrLn $ zotToSKI $ ( replicate 1 '1' ++ ) $ concat $ replicate 2 rev
+main = interact $ zotToSKI . concat . lines
 
 shortest :: [ [ a ] ] -> [ a ]
 shortest [ ] = [ ]

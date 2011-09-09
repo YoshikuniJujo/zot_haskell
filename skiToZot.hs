@@ -1,6 +1,7 @@
 main = interact skiToZot
 
 skiToZot :: String -> String
+skiToZot "\n"		= ""
 skiToZot ""		= ""
 skiToZot ( '`' : rest )	= '1' : skiToZot rest
 skiToZot ( 'i' : rest ) = "100" ++ skiToZot rest
