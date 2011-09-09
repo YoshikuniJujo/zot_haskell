@@ -39,4 +39,21 @@ self = \s r c -> int c ( s s ) ( s s ) $ \p -> r $ p c
 => self self ( \p -> p 1 0 1 ) 1
 => self self ( \p -> p 1 1 0 1 ) output
 => \p -> ( \p -> p 1 1 0 1 ) $ p output
-=> \p -> p output 1 1 0 1
+=> \p -> ( p output 1 1 0 1 )
+
+self = \s r c -> int c ( s s ) ( s s ) $ \p -> r $ p c
+ (改良)
+self = \s r c -> int c ( s s ) ( s s ) $ \p -> r $ int c ( p c ) ( p c ) p
+or
+self = \s r c -> int c ( s s $ \p -> r $ p c ) ( s s $ \p -> r $ p c )
+	( \p -> r p )
+下のはだめだ。
+しかし、上のほうもスピードに問題がある。
+self = \s r c -> int c ( s s 
+
+self2 = \s r c -> int c ( s s ) ( s s ) $ \p -> p $ r c 
+
+\p -> r $ p c ==> \p -> p c1 ==> \p -> ( p c2 ) c1
+\p -> p $ r c ==> \p -> p c1 ==> \p -> p ( 
+
+\f -> \x -> f x ==> \f -> f ==> I
