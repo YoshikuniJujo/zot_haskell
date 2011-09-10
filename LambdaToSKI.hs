@@ -18,6 +18,14 @@ lambdaToSKI ( Fun x e ) = out x e
 lambdaToSKI ( Apply f a ) = Apply ( lambdaToSKI f ) ( lambdaToSKI a )
 lambdaToSKI nf = error $ "lambdaToSKI error: " ++ show nf
 
+onlySKI :: Lambda -> Bool
+onlySKI ( Fun _ _ )	= False
+onlySKI ( Var _ )	= False
+onlySKI ( Apply f a )	= onlySKI f && onlySKI a
+onlySKI S		= True
+onlySKI K		= True
+onlySKI I		= True
+
 notHave :: String -> Lambda -> Bool
 notHave x0 ( Var x1 )
 	| x0 == x1		= False
@@ -27,6 +35,8 @@ notHave x0 ( Apply f a )	= notHave x0 f && notHave x0 a
 notHave _ _			= True
 
 out :: String -> Lambda -> Lambda
+out x0 e
+	| onlySKI e	= Apply K $ e
 out x0 ( Var x1 )
 	| x1 == x0	= I
 	| otherwise	= Apply K $ Var x1

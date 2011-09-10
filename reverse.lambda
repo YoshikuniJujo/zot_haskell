@@ -13,21 +13,27 @@ I I I K (\y48 -> z9 (\z77 -> z6 (z77 z14)) z9) ((\z91 y93 -> z9 (\z122 -> z6 (z1
 
 \r s c -> int c
 	( \_ -> s ( \p -> r ( p c ) ) s )
-	( \_ -> s ( \p -> r ( p c ) ) s ) r
+	( \_ -> s ( \p -> r ( p c ) ) s ) r --- self
 
 	( (\z91 y93 -> s ( \z122 -> r ( z122 z91 ) ) s ) c )
 	  ------------------------------------------------
 			|
 			+-> ( \x _ -> s ( \p -> r ( p x ) ) s ) c -> \_ -> s ( \p -> r ( p c ) ) s
 
-\c -> int c (\_ -> (
-	\r s c ->
-		int c (\_ -> s (\p -> r (p c)) s) ((\z91 y93 -> s (\z122 -> r (z122 z91)) s) c) r
-)
-(\p -> z
-77 c) ((\y86 r z9 c -> int c (\_ -> z9 (\p -> r (p c)) z9) (
-(\z91 y93 -> z9 (\z122 -> r (z122 z91)) z9) c) r) c)) ((\z91 y93 -> (\r z
-9 c -> int c (\_ -> z9 (\p -> r (p c)) z9) ((\z91 y93 -> z9 (\z
-122 -> r (z122 z91)) z9) c) r) (\z122 -> z122 z91) ((\y131 r z9 c -> int c
-(\_ -> z9 (\p -> r (p c)) z9) ((\z91 y93 -> z9 (\z122 -> r (z1
-22 z91)) z9) c) r) z91)) c) I
+\c -> int c
+	(\_ ->
+		( \r s c -> int c (\_ -> s (\p -> r (p c)) s) (\_ -> s (\p -> r (p c)) s) r)
+		(\p -> p c)
+		( \r s c -> int c (\_ -> s (\p -> r (p c)) s) (\_ -> s (\p -> r (p c)) s) r))
+	(\_ ->
+		(\r s c -> int c (\_ -> s (\p -> r (p c)) s) (\_ -> s (\p -> r (p c)) s) r)
+		(\p -> p c)
+		(\r s c -> int c (\_ -> s (\p -> r (p c)) s) (\_ -> s (\p -> r (p c)) s) r)
+	) I
+
+	|
+	V
+
+\c -> int c ( \_ -> self ( \p -> p c ) self ) ( \_ -> self ( \p -> p c ) self ) I =>
+\c -> ( \x -> int c x x I ) ( \_ -> self ( \p -> p c ) self ) =>
+\c -> ( \x -> int c x x I ) ( ( \y -> y ( \p -> p c ) y ) self )

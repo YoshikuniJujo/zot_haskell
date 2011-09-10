@@ -119,3 +119,38 @@ int op ( .. ) ( .. ) self => self
 self = \r s c -> int c ( \_ -> s ( \p -> r $ p c ) s ) ( \_ -> s ( \p -> r $ p c ) s ) r
 
 self I self 0 op => self ( \p -> I $ p c ) self op => \p -> p c
+
+--
+
+print = ( \_ -> s ( \p -> r $ p c ) s )
+self = \r s c -> c I I I K print print r
+
+( \x -> x x I ) self => S ( S I I ) ( K I ) self
+
+\x -> x x I => \x -> ( x x ) I => [x]( ( x x ) I ) => S [x]( x x ) ( K I ) =>
+S ( S I I ) ( K I )
+
+print => \p -> r $ p c => [p]( r $ p c ) => S ( K r ) [p]( p c ) => S ( K r ) ( S I $ K c )
+[c]print => [c][P]( r $ p c ) => [c]( S ( K r ) ( S I $ K c ) ) =>
+S ( K $ S $ K r ) [c]( S I $ K c ) =>
+S ( K $ S $ K r ) ( S ( K $ S I ) K ) --- PC
+
+print => K $ s ( \p -> r $ p c ) s
+self => \r s c -> c I I I K print print r => [r]( \s c -> c I I I K print print r ) =>
+[r][s]( \c -> c I I I K print print r ) => [r][s][c]( c I I I K print print r ) =>
+
+[c]( c I I I K print print r ) => [c]( ( c I I I K print print ) r ) =>
+S [c]( c I I I K print print ) $ K r => 
+
+[c]( c I I I K print print ) => [c]( ( c I I I K print ) print ) =>
+S [c]( c I I I K print ) PC => S ( S [c]( c I I I K ) PC ) PC =>
+S ( S ( S [c]( c I I I ) $ K K ) PC ) PC => 
+
+--
+
+\x -> \x -> y => [x]( \x -> y ) => K[x]y => K ( K y )
+
+\x -> \y -> y => [x]( \y -> y ) => [x][y]y => [x]I => KI
+
+\x y -> y x => [x]( \y -> y x ) => [x][y]( y x ) => [x]( S I $ K x ) =>
+S ( K $ S I ) K => ( ( S ( K ( S I ) ) ) K ) => ``s`k`sik
