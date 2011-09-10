@@ -1,8 +1,21 @@
 build-type:	Simple
-cabal-version:	>= 1.2
+cabal-version:	>= 1.6
 
 name:		zot
 version:	0.0.1
+author:		Yoshikuni Jujo <PAF01143@nifty.ne.jp>
+maintainer:	Yoshikuni Jujo <PAF01143@nifty.ne.jp>
+
+license:	BSD3
+license-file:	LICENSE
+
+category:	Language
+synopsis:	Zot language
+description:	Zot language
+
+source-repository	head
+  type:		git
+  location:	git://github.com/YoshikuniJujo/zot_haskell.git
 
 executable	zot
   hs-source-dirs:	src
