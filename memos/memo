@@ -154,3 +154,7 @@ S ( S ( S [c]( c I I I ) $ K K ) PC ) PC =>
 
 \x y -> y x => [x]( \y -> y x ) => [x][y]( y x ) => [x]( S I $ K x ) =>
 S ( K $ S I ) K => ( ( S ( K ( S I ) ) ) K ) => ``s`k`sik
+
+--
+
+other-modules をセットする必要がある。

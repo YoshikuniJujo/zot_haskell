@@ -1,0 +1,37 @@
+build-type:	Simple
+cabal-version:	>= 1.2
+
+name:		zot
+version:	0.0.1
+
+executable	zot
+  hs-source-dirs:	src
+  main-is:		zot.hs
+  build-depends:	base > 3 && < 5, monads-tf
+
+executable	addEcho
+  hs-source-dirs:	src
+  main-is:		addEcho.hs
+  build-depends:	base > 3 && < 5
+
+executable	skiToZot
+  hs-source-dirs:	src
+  main-is:		skiToZot.hs
+  build-depends:	base > 3 && < 5
+
+executable	lambdaToSKI
+  hs-source-dirs:	src
+  main-is:		lambdaToSKI.hs
+  other-modules:	SKI, LambdaToSKI, Parse
+  build-depends:	base > 3 && < 5
+
+executable	zotToSKI
+  hs-source-dirs:	src
+  main-is:		zotToSKI.hs
+  other-modules:	Parse
+  build-depends:	base > 3 && < 5
+
+executable	skiToLambda
+  hs-source-dirs:	src
+  main-is:		skiToLambda.hs
+  build-depends:	base > 3 && < 5
