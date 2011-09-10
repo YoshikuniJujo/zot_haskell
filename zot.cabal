@@ -20,34 +20,5 @@ source-repository	head
 executable	zot
   hs-source-dirs:	src
   main-is:		zot.hs
-  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki
+  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, AddEcho, Parse, ReadLambda, SKI
   build-depends:	base > 3 && < 5, monads-tf
-
-executable	addEcho
-  hs-source-dirs:	src
-  main-is:		addEcho.hs
-  other-modules:	AddEcho
-  build-depends:	base > 3 && < 5
-
-executable	skiToZot
-  hs-source-dirs:	src
-  main-is:		skiToZot.hs
-  build-depends:	base > 3 && < 5
-
-executable	lambdaToSKI
-  hs-source-dirs:	src
-  main-is:		lambdaToSKI.hs
-  other-modules:	SKI, ReadLambda, Parse, LambdaToSki
-  build-depends:	base > 3 && < 5
-
-executable	zotToSKI
-  hs-source-dirs:	src
-  main-is:		zotToSKI.hs
-  other-modules:	Parse, ZotToSki
-  build-depends:	base > 3 && < 5
-
-executable	skiToLambda
-  hs-source-dirs:	src
-  main-is:		skiToLambda.hs
-  other-modules:	SkiToLambda
-  build-depends:	base > 3 && < 5
