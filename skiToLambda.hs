@@ -5,14 +5,22 @@ data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
 
 main :: IO ()
 main = do
-	[ n ] <- getArgs
-	interact $ ( ++ "\n" ) . showLambda . times ( read n ) apply . one . readSKI 0 -- skiToLambda
+	( n : rest ) <- getArgs
+	case rest of
+		[ ]	-> interact $ ( ++ "\n" ) . showLambda . applyApp . applyI .
+			times ( read n ) apply . one . readSKI 0
+		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop . applyApp . applyI .
+			times ( read n ) apply . one . readSKI 0
 	where
 	one ( x, _, _ ) = x
 
 times :: Int -> ( a -> a ) -> a -> a
 times 0 _ x = x
 times n f x = times ( n - 1 ) f $ f x
+
+devide :: Int -> [ a ] -> [ [ a ] ]
+devide n [ ]	= [ ]
+devide n xs	= take n xs : devide n ( drop n xs )
 
 skiToLambda :: String -> String
 skiToLambda = fst . parens
@@ -33,10 +41,31 @@ readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 		y = "y" ++ show n
 		z = "z" ++ show n
 
-showLambda :: Lambda -> String
+showLambda, showLambdaH, showLambdaApply, showLambdaFun :: Lambda -> String
 showLambda ( Var v ) = v
 showLambda ( Apply f a ) = "(" ++ showLambda f ++ " " ++ showLambda a ++ ")"
 showLambda ( Fun p e ) = "(\\" ++ p ++ " -> " ++ showLambda e ++ ")"
+
+showLambdaTop ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
+showLambdaTop ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
+showLambdaTop v			= showLambdaH v
+
+showLambdaH ( Var v ) = v
+showLambdaH ( Apply f a ) = "(" ++ showLambdaApply f ++ " " ++ showLambdaH a ++ ")"
+showLambdaH ( Fun p ( Var v ) )
+	| p == v	= "I"
+showLambdaH ( Fun p1 ( Fun p2 ( Var v ) ) )
+	| p1 == v	= "K"
+	| p2 == v	= "KI"
+--	| otherwise	= "hoge"
+showLambdaH ( Fun p e ) = "(\\" ++ p ++ showLambdaFun e ++ ")"
+
+showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
+-- showLambdaApply ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
+showLambdaApply e		= showLambdaH e
+
+showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
+showLambdaFun e			= " -> " ++ showLambdaApply e
 
 parens :: String -> ( String, String )
 parens ( '`' : rest ) =	let
@@ -44,6 +73,24 @@ parens ( '`' : rest ) =	let
 	( a, rest3 ) = parens rest2 in
 	( "(" ++ f ++ " " ++ a ++ ")", rest3 )
 parens ( c : rest ) = ( [ c ], rest )
+
+applyI :: Lambda -> Lambda
+applyI ( Apply ( Fun p ( Var v ) ) ar )
+	| p == v	= ar
+	| otherwise	= Var v
+applyI ( Apply ( Fun p1 ( Fun p2 ( Var v ) ) ) a )
+	| p2 == v	= Fun p2 ( Var v )
+	| p1 == v	= Fun p2 a
+applyI ( Apply f a )	= Apply ( applyI f ) $ applyI a
+applyI ( Fun p e )	= Fun p $ applyI e
+applyI ( Var v )	= Var v
+
+applyApp :: Lambda -> Lambda
+applyApp ( Apply ( Fun p ( Apply ( Var v ) a ) ) f )
+	| p == v	= Apply f a
+applyApp ( Apply f a )	= Apply ( applyApp f ) $ applyApp a
+applyApp ( Fun p e )	= Fun p $ applyApp e
+applyApp ( Var v )	= Var v
 
 apply :: Lambda -> Lambda
 apply ( Apply fr ar ) =	case apply fr of

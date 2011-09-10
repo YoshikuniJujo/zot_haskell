@@ -1,0 +1,5 @@
+( \x -> x x ( \x -> x ) ) ( \remainder -> \self -> \c ->
+c ( \x -> x ) ( \x -> x ) ( \x -> x ) ( \x -> \y -> x )
+( \ignore -> self ( \print -> remainder ( print c ) ) self )
+( \ignore -> self ( \print -> remainder ( print c ) ) self )
+remainder )
