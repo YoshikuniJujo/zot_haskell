@@ -35,16 +35,17 @@ executable	skiToZot
 executable	lambdaToSKI
   hs-source-dirs:	src
   main-is:		lambdaToSKI.hs
-  other-modules:	SKI, LambdaToSKI, Parse
+  other-modules:	SKI, ReadLambda, Parse, LambdaToSKI
   build-depends:	base > 3 && < 5
 
 executable	zotToSKI
   hs-source-dirs:	src
   main-is:		zotToSKI.hs
-  other-modules:	Parse
+  other-modules:	Parse, ZotToSKI
   build-depends:	base > 3 && < 5
 
 executable	skiToLambda
   hs-source-dirs:	src
   main-is:		skiToLambda.hs
+  other-modules:	SkiToLambda
   build-depends:	base > 3 && < 5

@@ -1,108 +1,77 @@
-module LambdaToSKI where
+module LambdaToSKI ( main ) where
 
-import Parse
-import Data.Char
+import SKI ( mkski, Rec( .. ), fromInt, out, readChurch )
+import ReadLambda ( readLambda, showSKI )
 
--- data SKI = S | K | I deriving Show
+main :: IO ()
+main = interact lambdaToSKI
 
-data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
-	| S | K | I
-	deriving Show
+fromLambda :: String -> Rec a
+fromLambda = mkski . showSKI . readLambda
 
-churchTwo :: Lambda
-churchTwo =
-	Fun "f" $ Fun "x" $ Apply ( Var "f" ) $ Apply ( Var "f" ) ( Var "x" )
+lambdaToSKI :: String -> String
+lambdaToSKI = showSKI . readLambda
 
-lambdaToSKI :: Lambda -> Lambda
-lambdaToSKI ( Fun x e ) = out x e
-lambdaToSKI ( Apply f a ) = Apply ( lambdaToSKI f ) ( lambdaToSKI a )
-lambdaToSKI nf = error $ "lambdaToSKI error: " ++ show nf
+mulString = "\\x y -> x ( y ( \\g f xx -> f ( g f xx ) ) ) ( \\f x -> x )"
 
-onlySKI :: Lambda -> Bool
-onlySKI ( Fun _ _ )	= False
-onlySKI ( Var _ )	= False
-onlySKI ( Apply f a )	= onlySKI f && onlySKI a
-onlySKI S		= True
-onlySKI K		= True
-onlySKI I		= True
+mul :: Rec a -> Rec a -> Rec a
+mul x y = out ( out ( fromLambda mulString ) x ) y
 
-notHave :: String -> Lambda -> Bool
-notHave x0 ( Var x1 )
-	| x0 == x1		= False
-	| otherwise		= True
-notHave x0 ( Fun _ e )		= notHave x0 e
-notHave x0 ( Apply f a )	= notHave x0 f && notHave x0 a
-notHave _ _			= True
+zero :: Rec a
+zero = fromLambda "\\f x -> x"
 
-out :: String -> Lambda -> Lambda
-out x0 e
-	| onlySKI e	= Apply K $ e
-out x0 ( Var x1 )
-	| x1 == x0	= I
-	| otherwise	= Apply K $ Var x1
-{-
-out x0 ( Apply f ( Var x1 ) )
-	| x1 == x0 && notHave x0 f	= f
--}
-out x0 ( Apply f a )	= Apply ( Apply S  $ out x0 f ) $ out x0 a
-out x0 ( Fun x1 e )
-	| x0 == x1	= Apply K $ out x0 e
-	| otherwise	= ( out x0 ) $ out x1 e
-out x0 S		= Apply K S
-out x0 K		= Apply K K
-out x0 I		= Apply K I
--- out x0 ski		= Apply K $ ski
+suc :: Rec a -> Rec a
+suc = out ( fromLambda "\\g f x -> f ( g f x )" )
 
-showApply :: Lambda -> String
-showApply S = "s"
-showApply K = "k"
-showApply I = "i"
-showApply ( Apply f a ) = "`" ++ showApply f ++ showApply a
-showApply other = show other
+two = suc ( suc zero )
+three = suc two
 
-showSKI = showApply . lambdaToSKI
+mul', zero', suc', two' :: String
+mul' = lambdaToSKI mulString
+zero' = lambdaToSKI "\\f x -> x"
+suc' = lambdaToSKI "\\g f x -> f ( g f x)"
+two' = apply suc' $ apply suc' zero'
+three' = apply suc' two'
 
-readLambda :: String -> Lambda
-readLambda = fst . fst . head . ( parseLambda >*> eof ) . lexer
+apply :: String -> String -> String
+apply f a = '`' : f ++ a
 
-parseLambda :: Parse String Lambda
-parseLambda = parseApply `alt` parseFun
+cons, car, cdr :: String
+cons = "\\s b f -> f s b"
+car = "\\p -> p ( \\x y -> x )"
+cdr = "\\p -> p ( \\x y -> y )"
 
-parseAtom :: Parse String Lambda
-parseAtom = ( spot ( isLower . head ) `build` Var ) `alt`
-	parseParens
+true, false :: String
+true = "\\x y -> x"
+false = "\\x y -> y"
 
-parseParens :: Parse String Lambda
-parseParens = ( token "(" >*> parseLambda >*> token ")" ) `build`
-	( \( "(", ( body, ")" ) ) -> body )
+getBool :: Rec a -> Bool
+getBool x = let Bool b = out ( out x ( Bool True ) ) ( Bool False ) in b
 
-parseApply :: Parse String Lambda
-parseApply = recL1 Apply parseAtom
+getIntList :: Rec a -> [ Int ]
+getIntList lst
+--	| out ( out lst ( Bool True ) ) ( Bool False ) == Bool False	= [ ]
+	| isFalse lst							= [ ]
+	| otherwise							=
+		fromInt ( readChurch ( out lst ( fromLambda true ) ) ) :
+		getIntList ( out lst ( fromLambda false ) )
 
-parseFun :: Parse String Lambda
-parseFun =
-	( token "\\" >*> parsePars >*> token "->" >*> parseLambda )
-		`build` ( \( "\\", ( vs, ( "->", e ) ) ) -> makeFun vs e )
+isFalse :: Rec a -> Bool
+isFalse ( In x )	= case x ( Bool True ) of
+	In y	-> y ( Bool False ) == Bool False
+	_	-> False
+isFalse _		= False
 
-makeFun :: [ String ] -> Lambda -> Lambda
-makeFun [ p ] ex	= Fun p ex
-makeFun ( p : ps ) ex	= Fun p $ makeFun ps ex
+someList :: Rec a
+someList = mkski $ apply ( apply ( lambdaToSKI cons ) two' ) ( lambdaToSKI false )
 
-parsePars :: Parse String [ String ]
-parsePars = ( spot ( isLower . head ) `build` (:[]) ) `alt`
-	( ( spot ( isLower . head ) >*> parsePars ) `build`
-		( \( x, xs ) -> x : xs ) )
+makeIntList :: [ Int ] -> String
+makeIntList [ ]		= lambdaToSKI false
+makeIntList ( i : is )	=
+	apply ( apply ( lambdaToSKI cons ) $ makeChurch i ) $ makeIntList is
 
-lexer :: String -> [ String ]
-lexer "\n"			= [ ]
-lexer ""			= [ ]
-lexer ( '\\' : rest )		= "\\" : lexer rest
-lexer ( '-' : '>' : rest )	= "->" : lexer rest
-lexer ( ' ' : rest )		= lexer rest
-lexer ( '\n' : rest )		= lexer rest
-lexer ( '(' : rest )		= "(" : lexer rest
-lexer ( ')' : rest )		= ")" : lexer rest
-lexer ca@( c : _ )
-	| isLower c		= let ( ret, rest ) = span isAlphaNum ca in
-					ret : lexer rest
-lexer ca			= error $ "lexer error: " ++ ca
+makeChurch :: Int -> String
+makeChurch 0 = "`ki"
+makeChurch i = apply succ' $ makeChurch ( i - 1 )
+
+succ' = "`s``s`ks``s`kki"

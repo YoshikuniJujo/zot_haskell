@@ -158,3 +158,30 @@ S ( K $ S I ) K => ( ( S ( K ( S I ) ) ) K ) => ``s`k`sik
 --
 
 other-modules をセットする必要がある。
+
+zotToSKI 等々のコマンドを zot zotToSki や zot skiToZot や zot run [arg] 等にまとめようかな。
+そうすると list up してみると、
+zot lambdaToSki
+zot skiToZot
+zot run [arg]
+zot zotToSki
+zot skiToLambda n [-h]
+
+となり、また、lambda file の実行は
+cat hoge.lambda | zot lambdaToSki | zot skiToZot | zot run "..." となる。
+
+しかし、arg を取るというよりは、
+cat hoge.zot - | zot run
+という形でひょう準入力を利用するべきかもしれない。
+
+あるいはもっと普通に zot hoge.zot とすると入力をひょう準入力から得るという仕様のほうが良いか。
+zot - とすると、プログラム自体もひょう準入力から得るようにする。
+zot run の代わりに zot - ということになる。
+
+新しい list
+zot -
+zot hoge.hs
+zot lambdaToSki
+zot skiToLambda
+zot skiToZot
+zot zotToSki
