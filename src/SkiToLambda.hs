@@ -5,9 +5,10 @@ import System.Environment
 data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
 	deriving Show
 
-main :: IO ()
-main = do
-	( n : rest ) <- getArgs
+main :: [ String ] -> IO ()
+main args = do
+--	( n : rest ) <- getArgs
+	let ( n : rest ) = args
 	case rest of
 		[ ]	-> interact $ ( ++ "\n" ) . showLambda . applyApp . applyI .
 			times ( read n ) apply . one . readSKI 0

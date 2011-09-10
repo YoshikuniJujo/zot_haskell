@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./dist/build/zot/zot
+./dist/build/zot/zot $*

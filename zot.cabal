@@ -26,6 +26,7 @@ executable	zot
 executable	addEcho
   hs-source-dirs:	src
   main-is:		addEcho.hs
+  other-modules:	AddEcho
   build-depends:	base > 3 && < 5
 
 executable	skiToZot

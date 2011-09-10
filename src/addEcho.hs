@@ -1,5 +1,4 @@
 import System.Environment
+import qualified AddEcho
 
-main = do
-	args <- getArgs
-	interact (++ concat args)
+main = getArgs >>= AddEcho.main

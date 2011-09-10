@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cat $1 | ./lambdaToSKI.sh | ./skiToZot.sh | ./addEcho.sh $2 | ./zot.sh
+cat $1 | ./zot.sh lambdaToSki | ./zot.sh skiToZot | ./zot.sh arg $2 | ./zot.sh -
