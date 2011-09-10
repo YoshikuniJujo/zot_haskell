@@ -1,1 +1,1 @@
-import LambdaToSKI
+import LambdaToSki

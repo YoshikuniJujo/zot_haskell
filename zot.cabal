@@ -20,7 +20,7 @@ source-repository	head
 executable	zot
   hs-source-dirs:	src
   main-is:		zot.hs
-  other-modules:	Zot
+  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki
   build-depends:	base > 3 && < 5, monads-tf
 
 executable	addEcho
@@ -36,13 +36,13 @@ executable	skiToZot
 executable	lambdaToSKI
   hs-source-dirs:	src
   main-is:		lambdaToSKI.hs
-  other-modules:	SKI, ReadLambda, Parse, LambdaToSKI
+  other-modules:	SKI, ReadLambda, Parse, LambdaToSki
   build-depends:	base > 3 && < 5
 
 executable	zotToSKI
   hs-source-dirs:	src
   main-is:		zotToSKI.hs
-  other-modules:	Parse, ZotToSKI
+  other-modules:	Parse, ZotToSki
   build-depends:	base > 3 && < 5
 
 executable	skiToLambda

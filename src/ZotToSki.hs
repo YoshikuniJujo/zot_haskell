@@ -1,4 +1,4 @@
-module ZotToSKI ( main ) where
+module ZotToSki ( main ) where
 
 import Parse
 

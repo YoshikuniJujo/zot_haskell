@@ -1,1 +1,1 @@
-import ZotToSKI
+import ZotToSki

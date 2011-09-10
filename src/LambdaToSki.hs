@@ -1,4 +1,4 @@
-module LambdaToSKI ( main ) where
+module LambdaToSki ( main ) where
 
 import SKI ( mkski, Rec( .. ), fromInt, out, readChurch )
 import ReadLambda ( readLambda, showSKI )
