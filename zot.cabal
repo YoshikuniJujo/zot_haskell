@@ -20,6 +20,7 @@ source-repository	head
 executable	zot
   hs-source-dirs:	src
   main-is:		zot.hs
+  other-modules:	Zot
   build-depends:	base > 3 && < 5, monads-tf
 
 executable	addEcho
