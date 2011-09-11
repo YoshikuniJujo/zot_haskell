@@ -1,17 +1,20 @@
 module LambdaToSki ( main ) where
 
-import SKI ( mkski, Rec( .. ), fromInt, out, readChurch )
+-- import SKI ( mkski, Rec( .. ), fromInt, out, readChurch )
 import ReadLambda ( readLambda, showSKI )
 
 main :: IO ()
 main = interact lambdaToSKI
 
+{-
 fromLambda :: String -> Rec a
 fromLambda = mkski . showSKI . readLambda
+-}
 
 lambdaToSKI :: String -> String
 lambdaToSKI = showSKI . readLambda
 
+{-
 mulString = "\\x y -> x ( y ( \\g f xx -> f ( g f xx ) ) ) ( \\f x -> x )"
 
 mul :: Rec a -> Rec a -> Rec a
@@ -75,3 +78,5 @@ makeChurch 0 = "`ki"
 makeChurch i = apply succ' $ makeChurch ( i - 1 )
 
 succ' = "`s``s`ks``s`kki"
+
+-}

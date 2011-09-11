@@ -35,7 +35,7 @@ notHave x0 ( Apply f a )	= notHave x0 f && notHave x0 a
 notHave _ _			= True
 
 out :: String -> Lambda -> Lambda
-out x0 e
+out _ e
 	| onlySKI e	= Apply K $ e
 out x0 ( Var x1 )
 	| x1 == x0	= I
@@ -48,9 +48,9 @@ out x0 ( Apply f a )	= Apply ( Apply S  $ out x0 f ) $ out x0 a
 out x0 ( Fun x1 e )
 	| x0 == x1	= Apply K $ out x0 e
 	| otherwise	= ( out x0 ) $ out x1 e
-out x0 S		= Apply K S
-out x0 K		= Apply K K
-out x0 I		= Apply K I
+out _ S			= Apply K S
+out _ K			= Apply K K
+out _ I			= Apply K I
 -- out x0 ski		= Apply K $ ski
 
 showApply :: Lambda -> String
@@ -60,6 +60,7 @@ showApply I = "i"
 showApply ( Apply f a ) = "`" ++ showApply f ++ showApply a
 showApply other = show other
 
+showSKI :: Lambda -> String
 showSKI = showApply . lambdaToSKI
 
 readLambda :: String -> Lambda
@@ -87,6 +88,7 @@ parseFun =
 makeFun :: [ String ] -> Lambda -> Lambda
 makeFun [ p ] ex	= Fun p ex
 makeFun ( p : ps ) ex	= Fun p $ makeFun ps ex
+makeFun _ _		= error "makeFun error: need 1 parameter at least"
 
 parsePars :: Parse String [ String ]
 parsePars = ( spot ( isLower . head ) `build` (:[]) ) `alt`

@@ -42,7 +42,7 @@ alt :: Parse a b -> Parse a b -> Parse a b
 	[ ( ( y, z ), rem2 ) | ( y, rem1 ) <- p1 inp, ( z, rem2 ) <- p2 rem1 ]
 
 build :: Parse a b -> ( b -> c ) -> Parse a c
-build p f inp = [ ( f x, rem ) | ( x, rem ) <- p inp ]
+build p f inp = [ ( f x, rem1 ) | ( x, rem1 ) <- p inp ]
 
 recL1 :: ( b -> b -> b ) -> Parse a b -> Parse a b
 recL1 f p = ( p >*> recL1' f p ) `build` ( \( x, xs ) -> xs x )

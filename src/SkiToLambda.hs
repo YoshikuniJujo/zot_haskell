@@ -1,7 +1,5 @@
 module SkiToLambda ( main ) where
 
-import System.Environment
-
 data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
 	deriving Show
 
@@ -10,10 +8,11 @@ main args = do
 --	( n : rest ) <- getArgs
 	let ( n : rest ) = args
 	case rest of
-		[ ]	-> interact $ ( ++ "\n" ) . showLambda . applyApp . applyI .
+		[ ]		-> interact $ ( ++ "\n" ) . showLambda . applyApp . applyI .
 			times ( read n ) apply . one . readSKI 0
 		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop . applyApp . applyI .
 			times ( read n ) apply . one . readSKI 0
+		_		-> error "bad arguments"
 	where
 	one ( x, _, _ ) = x
 
@@ -22,11 +21,13 @@ times 0 _ x = x
 times n f x = times ( n - 1 ) f $ f x
 
 devide :: Int -> [ a ] -> [ [ a ] ]
-devide n [ ]	= [ ]
+devide _ [ ]	= [ ]
 devide n xs	= take n xs : devide n ( drop n xs )
 
+{-
 skiToLambda :: String -> String
 skiToLambda = fst . parens
+-}
 
 readSKI :: Int -> String -> ( Lambda, String, Int )
 readSKI n ( '`' : rest ) = let
@@ -43,8 +44,9 @@ readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 	where	x = "x" ++ show n
 		y = "y" ++ show n
 		z = "z" ++ show n
+readSKI _ _		= error "readSKI error"
 
-showLambda, showLambdaH, showLambdaApply, showLambdaFun :: Lambda -> String
+showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop :: Lambda -> String
 showLambda ( Var v ) = v
 showLambda ( Apply f a ) = "(" ++ showLambda f ++ " " ++ showLambda a ++ ")"
 showLambda ( Fun p e ) = "(\\" ++ p ++ " -> " ++ showLambda e ++ ")"
@@ -70,12 +72,14 @@ showLambdaApply e		= showLambdaH e
 showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
 showLambdaFun e			= " -> " ++ showLambdaApply e
 
+{-
 parens :: String -> ( String, String )
 parens ( '`' : rest ) =	let
 	( f, rest2 ) = parens rest
 	( a, rest3 ) = parens rest2 in
 	( "(" ++ f ++ " " ++ a ++ ")", rest3 )
 parens ( c : rest ) = ( [ c ], rest )
+-}
 
 applyI :: Lambda -> Lambda
 applyI ( Apply ( Fun p ( Var v ) ) ar )
