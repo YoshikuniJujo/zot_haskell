@@ -1,6 +1,6 @@
 {-# LANGUAGE PackageImports #-}
 
-module Zot ( main ) where
+module Zot ( main, mainFile ) where
 
 import "monads-tf" Control.Monad.State
 import Data.Char
@@ -43,7 +43,15 @@ main = do
 	apply funOut pr
 --	apply fun pr
 	putStrLn ""
-	
+
+mainFile :: String -> IO ()
+mainFile fn = do
+	prg <- readFile fn
+	arg <- getContents
+	fun <- makeZot $ filter ( not . isSpace ) $ remCom $ prg ++ arg
+	funOut <- apply fun =<< output
+	apply funOut pr
+	putStrLn ""
 
 main_ :: IO ()
 main_ = do

@@ -8,14 +8,16 @@ import qualified ZotToSki
 import qualified AddEcho
 
 import System.Environment ( getArgs )
+import Data.List ( isSuffixOf )
 
 main :: IO ()
 main = do
 	cmd : args <- getArgs
 	case cmd of
-		"-"		-> Zot.main
-		"lambdaToSki"	-> LambdaToSki.main
-		"skiToLambda"	-> SkiToLambda.main args
-		"skiToZot"	-> SkiToZot.main
-		"zotToSki"	-> ZotToSki.main
-		"arg"		-> AddEcho.main args
+		"-"					-> Zot.main
+		"lambdaToSki"				-> LambdaToSki.main
+		"skiToLambda"				-> SkiToLambda.main args
+		"skiToZot"				-> SkiToZot.main
+		"zotToSki"				-> ZotToSki.main
+		"arg"					-> AddEcho.main args
+		_	| ".zot" `isSuffixOf` cmd	-> Zot.mainFile cmd

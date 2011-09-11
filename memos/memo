@@ -180,8 +180,12 @@ zot run の代わりに zot - ということになる。
 
 新しい list
 zot -
-zot hoge.hs
+zot hoge.zot
 zot lambdaToSki
 zot skiToLambda
 zot skiToZot
 zot zotToSki
+
+--
+
+次は、zot hoge.zot の形を実現しよう。
