@@ -29,7 +29,7 @@ description:
   .
   > cat examples/reverse.zot | zot zotToSki | zot skiToLambda 3 -h
 
-data-files:	examples/reverse.lambda, examples/reverse.zot
+data-files:	examples/reverse.lambda, examples/reverse.zot, README
 
 source-repository	head
   type:		git
