@@ -1,23 +1,24 @@
 module Main where
 
-import qualified Zot
-import qualified LambdaToSki
-import qualified SkiToLambda
-import qualified SkiToZot
-import qualified ZotToSki
-import qualified AddEcho
+import qualified Zot		( main, mainFile )
+import qualified SkiToZot	( main )
+import qualified ZotToSki	( main )
+import qualified LambdaToSki	( main )
+import qualified SkiToLambda	( main )
 
 import System.Environment ( getArgs )
 import Data.List ( isSuffixOf )
 
 main :: IO ()
 main = do
-	cmd : args <- getArgs
-	case cmd of
-		"-"					-> Zot.main
-		"lambdaToSki"				-> LambdaToSki.main
-		"skiToLambda"				-> SkiToLambda.main args
+	ca@( ~( cmd : args ) ) <- getArgs
+	let command = if null ca then "" else cmd
+	case command of
 		"skiToZot"				-> SkiToZot.main
 		"zotToSki"				-> ZotToSki.main
-		"arg"					-> AddEcho.main args
-		_	| ".zot" `isSuffixOf` cmd	-> Zot.mainFile cmd
+		"lambdaToSki"				-> LambdaToSki.main
+		"skiToLambda"				-> SkiToLambda.main args
+		"arg"					-> interact $ (++ concat args )
+		"-"					-> Zot.main
+		_	| ".zot" `isSuffixOf` command	-> Zot.mainFile command
+			| otherwise			-> error "bad arguments"

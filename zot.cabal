@@ -13,7 +13,7 @@ license-file:	LICENSE
 category:	Language
 synopsis:	Zot language
 description:
-  Zot language
+  Zot language ( http://semarch.linguistics.fas.nyu.edu/barker/Iota/zot.html )
   .
   > echo "10100" | cat examples/reverse.zot - | zot -
   > 00101
@@ -38,5 +38,6 @@ source-repository	head
 executable	zot
   hs-source-dirs:	src
   main-is:		zot.hs
-  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, AddEcho, Parse, ReadLambda, SKI
+  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, Parse, ReadLambda, SKI
   build-depends:	base > 3 && < 5, monads-tf
+  ghc-options:		-Wall
