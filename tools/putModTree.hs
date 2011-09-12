@@ -59,7 +59,7 @@ depend dir fps fp = do
 
 filterSource :: [ FilePath ] -> [ FilePath ]
 filterSource =
-	map ( stripSuffix ) . filter ( isSuffixOf ".hs" ||| isSuffixOf ".y" ) .
+	map stripSuffix . filter ( isSuffixOf ".hs" ||| isSuffixOf ".y" ) .
 	filter ( not . isPrefixOf "." )
 
 mkReg :: [ FilePath ] -> String

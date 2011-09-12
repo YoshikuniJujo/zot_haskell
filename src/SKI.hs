@@ -47,7 +47,7 @@ s :: Rec a
 s = In os
 
 readChurch :: Rec a -> Rec a
-readChurch cn = cn `out_` suc `out_` ( Int 0 )
+readChurch cn = cn `out_` suc `out_` Int 0
 
 mkski :: String -> Rec a
 mkski = fst . makeSKI

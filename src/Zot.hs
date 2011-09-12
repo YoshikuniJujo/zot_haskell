@@ -94,7 +94,7 @@ f $$ a = apply f a
 -}
 
 makeZot :: String -> IO Fun
-makeZot "" = return $ empty
+makeZot "" = return empty
 makeZot bs = do
 	f <- makeZot $ init bs
 	apply f $ case last bs of

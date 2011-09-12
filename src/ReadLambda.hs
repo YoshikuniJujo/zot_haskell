@@ -36,7 +36,7 @@ notHave _ _			= True
 
 out :: String -> Lambda -> Lambda
 out _ e
-	| onlySKI e	= Apply K $ e
+	| onlySKI e	= Apply K e
 out x0 ( Var x1 )
 	| x1 == x0	= I
 	| otherwise	= Apply K $ Var x1
@@ -47,7 +47,7 @@ out x0 ( Apply f ( Var x1 ) )
 out x0 ( Apply f a )	= Apply ( Apply S  $ out x0 f ) $ out x0 a
 out x0 ( Fun x1 e )
 	| x0 == x1	= Apply K $ out x0 e
-	| otherwise	= ( out x0 ) $ out x1 e
+	| otherwise	= out x0 $ out x1 e
 out _ S			= Apply K S
 out _ K			= Apply K K
 out _ I			= Apply K I
@@ -92,8 +92,7 @@ makeFun _ _		= error "makeFun error: need 1 parameter at least"
 
 parsePars :: Parse String [ String ]
 parsePars = ( spot ( isLower . head ) `build` (:[]) ) `alt`
-	( ( spot ( isLower . head ) >*> parsePars ) `build`
-		( \( x, xs ) -> x : xs ) )
+	( ( spot ( isLower . head ) >*> parsePars ) `build` uncurry (:) )
 
 lexer :: String -> [ String ]
 lexer "\n"			= [ ]

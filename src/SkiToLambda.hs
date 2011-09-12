@@ -35,15 +35,15 @@ readSKI n ( '`' : rest ) = let
 	( a, rest3, n3 ) = readSKI n2 rest2 in
 	( Apply f a, rest3, n3 )
 readSKI n ( 'i' : rest ) = ( Fun x $ Var x, rest, n + 1 )
-	where	x = "x" ++ show n
+	where	x = 'x' : show n
 readSKI n ( 'k' : rest ) = ( Fun x $ Fun y $ Var x, rest, n + 1 )
-	where	x = "x" ++ show n
-		y = "y" ++ show n
+	where	x = 'x' : show n
+		y = 'y' : show n
 readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 	Apply ( Apply ( Var x ) ( Var z ) ) ( Apply ( Var y ) ( Var z ) ), rest, n +1 )
-	where	x = "x" ++ show n
-		y = "y" ++ show n
-		z = "z" ++ show n
+	where	x = 'x' : show n
+		y = 'y' : show n
+		z = 'z' : show n
 readSKI _ _		= error "readSKI error"
 
 showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop :: Lambda -> String

@@ -49,8 +49,7 @@ recL1 f p = ( p >*> recL1' f p ) `build` ( \( x, xs ) -> xs x )
 
 recL1' :: ( b -> c -> b ) -> Parse a c -> Parse a ( b -> b )
 recL1' f p = succeed id `alt`
-	( ( p >*> recL1' f p ) `build` ( \( x, xs ) ->
-		\y -> xs ( f y x ) ) )
+	( ( p >*> recL1' f p ) `build` ( \( x, xs ) y -> xs ( f y x ) ) )
 
 eof :: Parse a ()
 eof [ ]	= [ ( (), [ ] ) ]

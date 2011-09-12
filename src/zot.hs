@@ -18,7 +18,7 @@ main = do
 		"zotToSki"				-> ZotToSki.main
 		"lambdaToSki"				-> LambdaToSki.main
 		"skiToLambda"				-> SkiToLambda.main args
-		"arg"					-> interact $ (++ concat args )
+		"arg"					-> interact (++ concat args )
 		"-"					-> Zot.main
 		_	| ".zot" `isSuffixOf` command	-> Zot.mainFile command
 			| otherwise			-> error "bad arguments"
