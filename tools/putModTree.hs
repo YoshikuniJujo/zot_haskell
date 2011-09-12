@@ -63,7 +63,7 @@ filterSource =
 	filter ( not . isPrefixOf "." )
 
 mkReg :: [ FilePath ] -> String
-mkReg fps = "^import\\s+(?:qualified\\s+)?(" ++ intercalate "|" fps ++ ")"
+mkReg fps = "^import\\s+(?:qualified\\s+)?(" ++ intercalate "|" fps ++ ")($|\\s|\\()"
 
 stripSuffix :: String -> String
 stripSuffix = takeWhile ( /= '.' )
