@@ -195,3 +195,103 @@ zot zotToSki
 putModTree の bug を発見。
 正規表現でファイル名の頭の部分にマッチしてしまう。
 すぐなおせると思う。
+
+e	\c -> c I
+zero	\c -> c ( \f -> f S K )
+one	\c L -> L ( \l R -> R ( \r -> c ( l r ) ) )
+
+e one => \L -> L ( \l R -> R ( \r -> l r ) )
+
+e one zero => ( \L -> ... ) zero => zero ( \l R -> ... ) =>
+( \c -> ... ) ( \l R -> ... ) => ( \l R -> ... ) ( \f -> f S K ) =>
+\R -> R ( \r -> r S K )
+
+e one zero zero => ( \R -> R ( \r -> r S K ) ) zero =>
+zero ( \r -> r S K ) => ( \c -> ... ) ( \r -> r S K ) =>
+( \r -> r S K ) ( \f -> f S K ) => S K S K
+
+e one one => one ( \l R -> R ( \r -> l r ) ) =>
+( \c L -> L ( \l R -> R ( \r -> c ( l r ) ) ) ) ( \l R -> R ( \r -> l r ) ) =>
+\L -> L ( \l R -> R ( \r -> ( \l R -> R ( \r -> l r ) ) ( l r ) ) ) =>
+\L -> L ( \l R -> R ( \r -> ( \R -> R ( \r' -> ( l r' ) r ) ) ) )
+
+e one one zero zero zero =>
+
+continuation
+
+f x --> \c -> c $ f x => ( \c -> c f ) ( \c -> c x )
+
+( \c -> c ( \x c -> c $ f x ) ) ( \c -> c x ) =>
+( c -> c x ) ( \x c -> c $ f x ) => \c -> c $ f x
+
+( \x c -> c $ f x ) $ x => \c -> c $ f x
+
+return a => \k -> k a
+c >>= f => \k -> c ( \a -> f a k )
+callCC f => \k -> f ( \a -> \_ -> k a ) k
+
+callCC ( \exit -> return x >>= exit y >> return z ) => callCC prg
+\k -> prg ( \a -> \_ -> k a ) k =>
+\k -> ( \exit -> return x >>= exit y >> return z ) ( \a -> \_ -> k a ) k =>
+\k -> ( return x >>= ( \a -> \_ -> k a ) y >>= \_ -> return z ) k =>
+\k -> ( return x >>= \_ -> k y >>= \_ -> return z ) k
+
+( \c -> c x ) ( \x c -> c $ f x ) ( \x c -> c $ g x )
+	|
+	V
+\k -> ( \c -> c x ) ( \x _ -> k $ f x ) ( \x c -> c $ g x ) k
+	
+\k -> ( \c -> c x ) ( \x c -> if cond then k $ f x else c $ f x ) ( .. ) k
+
+x f g = g ( f x )
+
+empty => ( $ I )
+zero => ( $ \f -> f s k ) => ( $ i )
+one => \c -> ( $ \l -> ( $ \r -> c $ l r ) )
+
+empty one => ( $ \l -> ( $ \r -> l r ) )
+empty one zero => ( $ \l -> ( $ \r -> l r ) ) ( $ \f -> f s k ) =>
+( $ \r -> r s k ) => ( $ i )
+
+( $ X ) ( $ Y ) => ( $ Y ) X => X Y
+
+empty one one =>
+( $ \l -> ( $ \r -> l r ) ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) =>
+( $ \l -> ( $ \r -> ( \l' -> ( $ \r' -> l' r' ) ) $ l r ) ) =>
+( $ \l -> ( $ \r -> ( $ \r' -> l r r' ) ) )
+
+X => ( $ x )
+Y => ( $ y )
+z => ( $ z )
+empty one one ( $ X ) ( $ Y ) ( $ Z ) =>
+( $ \l -> ( $ \r -> ( $ \r' -> l r r' ) ) ) ( $ X ) ( $ Y ) ( $ Z ) =>
+( $ \r -> ( $ \r' -> X r r' ) ) ( $ Y ) ( $ Z ) =>
+( $ \r' -> X Y r' ) ( $ Z ) => X Y Z
+empty one ( $ X ) one ( $ Y ) ( $ Z ) =>
+( $ \l -> ( $ \r -> l r ) ) ( $ X ) one ( $ Y ) ( $ Z ) =>
+( $ \r -> X r ) one ( $ Y ) ( $ Z ) =>
+( $ \r -> X r ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) ( $ Y ) ( $ Z ) =>
+( $ \l -> ( $ \r -> ( \r' -> X r' ) $ l r ) ) ( $ Y ) ( $ Z ) =>
+( $ \l -> ( $ \r -> X ( l r ) ) ) ( $ Y ) ( $ Z ) =>
+( $ \r -> X ( Y r ) ) ( $ Z ) => X ( Y Z )
+
+( $ some ) one ( $ X ) =>
+( $ some ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) ( $ X ) =>
+( $ \l -> ( $ \r -> some $ l r ) ) ( $ X ) =>
+( $ \r -> some $ X r )
+
+( $ some ) one ( $ X ) one =>
+( $ \r -> some $ X r ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) =>
+( $ \l -> ( $ \r -> ( \r' -> some $ X r' ) $ l r ) ) =>
+( $ \l -> ( $ \r -> some $ X ( l r ) )
+
+some one one => ( $ \l -> ( $ \r -> ( $ \r' -> some l r r' ) ) )
+
+( $ some ) one == ( $ \l -> ( $ \r -> some $ l r ) )
+( $ some ) one one =>
+( $ \l -> ( $ \r -> ( \l' -> ( $ \r' -> some $ l' r' ) ) $ l r ) ) =>
+( $ \l -> ( $ \r -> ( $ \r' -> some $ ( l r ) r' ) ) )
+
+( $ some( n ) ) one == ( $ some ( n + 1 ) )
+some( n + 1 ) = \l -> ( $ \r -> some( n ) $ l r )
+some( n + 2 ) = \l -> ( $ \r -> ( $ \r' -> some( n ) $ ( l r ) r' ) )
