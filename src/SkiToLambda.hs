@@ -8,18 +8,35 @@ depth ( Var _ )		= 0
 depth ( Apply f a ) 	= ( depth f ) + ( depth a )
 depth ( Fun _ e )	= depth e + 1
 
+size :: Lambda -> Int
+size ( Var _ )		= 1
+size ( Apply f a )	= size f + size a
+size ( Fun _ e )	= 1 + size e
+
+applyToMin :: Lambda -> Lambda
+applyToMin e = minimumSize e $ take 15 $ iterate apply e
+
+minimumSize :: Lambda -> [ Lambda ] -> Lambda
+minimumSize l0 [ ]		= l0
+minimumSize l0 ( l1 : ls )
+	| size l0 < size l1	= minimumSize l0 ls
+	| otherwise		= minimumSize l1 ls
+
 main :: [ String ] -> IO ()
 main args = do
-	let ( n : rest ) = args
+	let rest = args
 	case rest of
 		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' .
-			{- applyApp . -} applyI .
-			times ( read n ) apply . one . readSKI 0
+--			{- applyApp . -} applyI .
+			applyToMin . one . readSKI 0
 		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop .
-			applyApp .  applyI .
-			times ( read n ) apply . one . readSKI 0
+--			applyApp .  applyI .
+			applyI .
+			applyToMin .
+--			applyI .
+			one . readSKI 0
 		[ "-d" ]	-> interact $ ( ++ "\n" ) . show . {- applyApp .-} applyI .
-			times ( read n ) apply . one . readSKI 0
+			applyToMin . one . readSKI 0
 		_		-> error "bad arguments"
 	where
 	one ( x, _, _ ) = x
