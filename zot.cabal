@@ -38,6 +38,6 @@ source-repository	head
 executable	zot
   hs-source-dirs:	src
   main-is:		zot.hs
-  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, Parse, ReadLambda, SKI
+  other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, Parse, SKI
   build-depends:	base > 3 && < 5, monads-tf
   ghc-options:		-Wall

@@ -7,12 +7,14 @@ module Parse (
 	build,
 	token,
 	tokens,
+	list1,
 	recL1,
 	eof
 ) where
 
 infixr 8 >*>
 infix 7 `build`
+infixl 6 `alt`
 
 type Parse a b = [ a ] -> [ ( b, [ a ] ) ]
 
@@ -54,3 +56,6 @@ recL1' f p = succeed id `alt`
 eof :: Parse a ()
 eof [ ]	= [ ( (), [ ] ) ]
 eof _	= [ ]
+
+list1 :: Parse a b -> Parse a [ b ]
+list1 p = p `build` ( : [] ) `alt` p >*> list1 p `build` uncurry ( : )

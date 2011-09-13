@@ -1,82 +1,81 @@
 module LambdaToSki ( main ) where
 
--- import SKI ( mkski, Rec( .. ), fromInt, out, readChurch )
-import ReadLambda ( readLambda, showSKI )
+import Parse ( Parse, spot, token, eof, ( >*> ), alt, build, list1, recL1 )
+import Data.Char ( isLower, isAlphaNum )
 
 main :: IO ()
-main = interact lambdaToSKI
+main = interact $ show . lambdaToSki . readLambda
 
-{-
-fromLambda :: String -> Rec a
-fromLambda = mkski . showSKI . readLambda
--}
+data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda | S | K | I
 
-lambdaToSKI :: String -> String
-lambdaToSKI = showSKI . readLambda
+instance Show Lambda where
+	show S			= "s"
+	show K			= "k"
+	show I			= "i"
+	show ( Apply f a )	= "`" ++ show f ++ show a
+	show ( Fun p e )	= "(fun " ++ p ++ " " ++ show e ++ ")"
+	show ( Var v )		= "(var " ++ v ++ ")"
 
-{-
-mulString = "\\x y -> x ( y ( \\g f xx -> f ( g f xx ) ) ) ( \\f x -> x )"
+onlySKI :: Lambda -> Bool
+onlySKI S		= True
+onlySKI K		= True
+onlySKI I		= True
+onlySKI ( Apply f a )	= onlySKI f && onlySKI a
+onlySKI _		= False
 
-mul :: Rec a -> Rec a -> Rec a
-mul x y = out ( out ( fromLambda mulString ) x ) y
+makeFun :: [ String ] -> Lambda -> Lambda
+makeFun [ p ] ex	= Fun p ex
+makeFun ( p : ps ) ex	= Fun p $ makeFun ps ex
+makeFun _ _		= error "makeFun error: need 1 parameter at least"
 
-zero :: Rec a
-zero = fromLambda "\\f x -> x"
+lambdaToSki :: Lambda -> Lambda
+lambdaToSki ( Fun x e )		= out x e
+lambdaToSki ( Apply f a )	= Apply ( lambdaToSki f ) ( lambdaToSki a )
+lambdaToSki _			= error $ "lambdaToSki error"
 
-suc :: Rec a -> Rec a
-suc = out ( fromLambda "\\g f x -> f ( g f x )" )
+out :: String -> Lambda -> Lambda
+out _ e
+	| onlySKI e	= Apply K e
+out x0 v@( Var x1 )
+	| x1 == x0	= I
+	| otherwise	= Apply K v
+out x0 ( Apply f a )	= Apply ( Apply S  $ out x0 f ) $ out x0 a
+out x0 ( Fun x1 e )
+	| x0 == x1	= Apply K $ out x0 e
+	| otherwise	= out x0 $ out x1 e
+out _ _			= error "never occur"
 
-two = suc ( suc zero )
-three = suc two
+readLambda :: String -> Lambda
+readLambda = fst . fst . head . ( parseLambda >*> eof ) . lexer
 
-mul', zero', suc', two' :: String
-mul' = lambdaToSKI mulString
-zero' = lambdaToSKI "\\f x -> x"
-suc' = lambdaToSKI "\\g f x -> f ( g f x)"
-two' = apply suc' $ apply suc' zero'
-three' = apply suc' two'
+parseLambda :: Parse String Lambda
+parseLambda = parseApply `alt` parseFun
 
-apply :: String -> String -> String
-apply f a = '`' : f ++ a
+parseApply :: Parse String Lambda
+parseApply = recL1 Apply parseAtom
 
-cons, car, cdr :: String
-cons = "\\s b f -> f s b"
-car = "\\p -> p ( \\x y -> x )"
-cdr = "\\p -> p ( \\x y -> y )"
+parseFun :: Parse String Lambda
+parseFun = token "\\" >*> parseParams >*> token "->" >*> parseLambda
+	`build` ( \( "\\", ( ps, ( "->", e ) ) ) -> makeFun ps e )
 
-true, false :: String
-true = "\\x y -> x"
-false = "\\x y -> y"
+parseAtom :: Parse String Lambda
+parseAtom = ( spot ( isLower . head ) `build` Var ) `alt` parseParens
 
-getBool :: Rec a -> Bool
-getBool x = let Bool b = out ( out x ( Bool True ) ) ( Bool False ) in b
+parseParens :: Parse String Lambda
+parseParens = token "(" >*> parseLambda >*> token ")" `build` fst . snd
 
-getIntList :: Rec a -> [ Int ]
-getIntList lst
---	| out ( out lst ( Bool True ) ) ( Bool False ) == Bool False	= [ ]
-	| isFalse lst							= [ ]
-	| otherwise							=
-		fromInt ( readChurch ( out lst ( fromLambda true ) ) ) :
-		getIntList ( out lst ( fromLambda false ) )
+parseParams :: Parse String [ String ]
+parseParams = list1 $ spot $ isLower . head
 
-isFalse :: Rec a -> Bool
-isFalse ( In x )	= case x ( Bool True ) of
-	In y	-> y ( Bool False ) == Bool False
-	_	-> False
-isFalse _		= False
-
-someList :: Rec a
-someList = mkski $ apply ( apply ( lambdaToSKI cons ) two' ) ( lambdaToSKI false )
-
-makeIntList :: [ Int ] -> String
-makeIntList [ ]		= lambdaToSKI false
-makeIntList ( i : is )	=
-	apply ( apply ( lambdaToSKI cons ) $ makeChurch i ) $ makeIntList is
-
-makeChurch :: Int -> String
-makeChurch 0 = "`ki"
-makeChurch i = apply succ' $ makeChurch ( i - 1 )
-
-succ' = "`s``s`ks``s`kki"
-
--}
+lexer :: String -> [ String ]
+lexer ""			= [ ]
+lexer ( ' ' : rest )		= lexer rest
+lexer ( '\n' : rest )		= lexer rest
+lexer ( '\\' : rest )		= "\\" : lexer rest
+lexer ( '-' : '>' : rest )	= "->" : lexer rest
+lexer ( '(' : rest )		= "(" : lexer rest
+lexer ( ')' : rest )		= ")" : lexer rest
+lexer ca@( c : _ )
+	| isLower c		= let ( ret, rest ) = span isAlphaNum ca in
+					ret : lexer rest
+lexer ca			= error $ "lexer error: " ++ ca
