@@ -14,11 +14,12 @@ main = do
 	ca@( ~( cmd : args ) ) <- getArgs
 	let command = if null ca then "" else cmd
 	case command of
-		"skiToZot"				-> SkiToZot.main
-		"zotToSki"				-> ZotToSki.main
-		"lambdaToSki"				-> LambdaToSki.main
-		"skiToLambda"				-> SkiToLambda.main args
-		"arg"					-> interact (++ concat args )
-		"-"					-> Zot.main
-		_	| ".zot" `isSuffixOf` command	-> Zot.mainFile command
+		"skiToZot"	-> SkiToZot.main
+		"zotToSki"	-> ZotToSki.main
+		"lambdaToSki"	-> LambdaToSki.main
+		"skiToLambda"	-> SkiToLambda.main args
+		"arg"		-> interact (++ concat args )
+		"-"		-> Zot.main
+		_
+			| ".zot" `isSuffixOf` command	-> Zot.mainFile command
 			| otherwise			-> error "bad arguments"
