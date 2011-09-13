@@ -71,7 +71,7 @@ readZot = foldM ( $$ ) empty . read . filter ( `elem` "01" )
 interpret :: String -> IO ()
 interpret src = readZot ( removeComment src ) >$$< output >$$ pr >> putStrLn ""
 	where
-	removeComment = concat . map ( takeWhile ( /= '#' ) ) . lines
+	removeComment = concatMap ( takeWhile ( /= '#' ) ) . lines
 
 main :: IO ()
 main = getContents >>= interpret
