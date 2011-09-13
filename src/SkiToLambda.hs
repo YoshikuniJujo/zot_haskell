@@ -3,14 +3,22 @@ module SkiToLambda ( main ) where
 data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
 	deriving Show
 
+depth :: Lambda -> Int
+depth ( Var _ )		= 0
+depth ( Apply f a ) 	= ( depth f ) + ( depth a )
+depth ( Fun _ e )	= depth e + 1
+
 main :: [ String ] -> IO ()
 main args = do
---	( n : rest ) <- getArgs
 	let ( n : rest ) = args
 	case rest of
-		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' . applyApp . applyI .
+		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' .
+			{- applyApp . -} applyI .
 			times ( read n ) apply . one . readSKI 0
-		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop . applyApp . applyI .
+		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop .
+			applyApp .  applyI .
+			times ( read n ) apply . one . readSKI 0
+		[ "-d" ]	-> interact $ ( ++ "\n" ) . show . {- applyApp .-} applyI .
 			times ( read n ) apply . one . readSKI 0
 		_		-> error "bad arguments"
 	where
@@ -23,11 +31,6 @@ times n f x = times ( n - 1 ) f $ f x
 devide :: Int -> [ a ] -> [ [ a ] ]
 devide _ [ ]	= [ ]
 devide n xs	= take n xs : devide n ( drop n xs )
-
-{-
-skiToLambda :: String -> String
-skiToLambda = fst . parens
--}
 
 readSKI :: Int -> String -> ( Lambda, String, Int )
 readSKI n ( '`' : rest ) = let
@@ -46,15 +49,15 @@ readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 		z = 'z' : show n
 readSKI _ _		= error "readSKI error"
 
-showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop :: Lambda -> String
+showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop,
+	showLambdaFun', showLambdaApply', showLambdaTop'
+	:: Lambda -> String
 showLambda ( Var v ) = v
--- showLambda ( Apply f a ) = "(" ++ showLambda f ++ " " ++ showLambda a ++ ")"
--- showLambda ( Fun p e ) = "(\\" ++ p ++ " -> " ++ showLambda e ++ ")"
 showLambda ( Apply f a ) = "(" ++ showLambdaApply' f ++ " " ++ showLambda a ++ ")"
 showLambda ( Fun p e ) = "(\\" ++ p ++ showLambdaFun' e ++ ")"
 
 showLambdaFun' ( Fun p e )	= " " ++ p ++ showLambdaFun' e
-showLambdaFun' e		= " -> " ++ showLambda e
+showLambdaFun' e		= " -> " ++ showLambdaApply' e
 
 showLambdaApply' ( Apply f a )	= showLambdaApply' f ++ " " ++ showLambda a
 showLambdaApply' e		= showLambda e
@@ -112,11 +115,14 @@ applyApp ( Fun p e )	= Fun p $ applyApp e
 applyApp ( Var v )	= Var v
 
 apply :: Lambda -> Lambda
-apply ( Apply fr ar ) =	case apply fr of
-	Fun p e -> applyPara p ( apply ar ) e
-	nf	-> Apply nf ( apply ar )
+apply lambda@( Apply fr ar ) = let
+	newLambda = case apply fr of
+		Fun p e -> applyPara p ( apply ar ) e
+		nf	-> Apply nf ( apply ar ) in
+--	if depth lambda < depth newLambda then lambda else newLambda
+	newLambda
 apply ( Fun p e ) = Fun p ( apply e )
-apply ( Var v ) = Var v
+apply v@( Var _ ) = v
 
 applyPara :: String -> Lambda -> Lambda -> Lambda
 applyPara p a1 ( Var v )
