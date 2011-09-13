@@ -8,7 +8,7 @@ main args = do
 --	( n : rest ) <- getArgs
 	let ( n : rest ) = args
 	case rest of
-		[ ]		-> interact $ ( ++ "\n" ) . showLambda . applyApp . applyI .
+		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' . applyApp . applyI .
 			times ( read n ) apply . one . readSKI 0
 		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop . applyApp . applyI .
 			times ( read n ) apply . one . readSKI 0
@@ -48,8 +48,20 @@ readSKI _ _		= error "readSKI error"
 
 showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop :: Lambda -> String
 showLambda ( Var v ) = v
-showLambda ( Apply f a ) = "(" ++ showLambda f ++ " " ++ showLambda a ++ ")"
-showLambda ( Fun p e ) = "(\\" ++ p ++ " -> " ++ showLambda e ++ ")"
+-- showLambda ( Apply f a ) = "(" ++ showLambda f ++ " " ++ showLambda a ++ ")"
+-- showLambda ( Fun p e ) = "(\\" ++ p ++ " -> " ++ showLambda e ++ ")"
+showLambda ( Apply f a ) = "(" ++ showLambdaApply' f ++ " " ++ showLambda a ++ ")"
+showLambda ( Fun p e ) = "(\\" ++ p ++ showLambdaFun' e ++ ")"
+
+showLambdaFun' ( Fun p e )	= " " ++ p ++ showLambdaFun' e
+showLambdaFun' e		= " -> " ++ showLambda e
+
+showLambdaApply' ( Apply f a )	= showLambdaApply' f ++ " " ++ showLambda a
+showLambdaApply' e		= showLambda e
+
+showLambdaTop' ( Apply f a )	= showLambdaApply' f ++ " " ++ showLambda a
+showLambdaTop' ( Fun p e )	= "\\" ++ p ++ showLambdaFun' e
+showLambdaTop' v		= showLambda v
 
 showLambdaTop ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
 showLambdaTop ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
