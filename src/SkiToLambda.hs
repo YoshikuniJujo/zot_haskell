@@ -3,11 +3,6 @@ module SkiToLambda ( main ) where
 data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
 	deriving Show
 
-depth :: Lambda -> Int
-depth ( Var _ )		= 0
-depth ( Apply f a ) 	= ( depth f ) + ( depth a )
-depth ( Fun _ e )	= depth e + 1
-
 size :: Lambda -> Int
 size ( Var _ )		= 1
 size ( Apply f a )	= size f + size a
@@ -27,23 +22,17 @@ main args = do
 	let rest = args
 	case rest of
 		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' .
---			{- applyApp . -} applyI .
+			applyI .
 			applyToMin . one . readSKI 0
 		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop .
---			applyApp .  applyI .
 			applyI .
 			applyToMin .
---			applyI .
 			one . readSKI 0
 		[ "-d" ]	-> interact $ ( ++ "\n" ) . show . {- applyApp .-} applyI .
 			applyToMin . one . readSKI 0
 		_		-> error "bad arguments"
 	where
 	one ( x, _, _ ) = x
-
-times :: Int -> ( a -> a ) -> a -> a
-times 0 _ x = x
-times n f x = times ( n - 1 ) f $ f x
 
 devide :: Int -> [ a ] -> [ [ a ] ]
 devide _ [ ]	= [ ]
@@ -94,24 +83,13 @@ showLambdaH ( Fun p ( Var v ) )
 showLambdaH ( Fun p1 ( Fun p2 ( Var v ) ) )
 	| p1 == v	= "K"
 	| p2 == v	= "KI"
---	| otherwise	= "hoge"
 showLambdaH ( Fun p e ) = "(\\" ++ p ++ showLambdaFun e ++ ")"
 
 showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
--- showLambdaApply ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
 showLambdaApply e		= showLambdaH e
 
 showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
 showLambdaFun e			= " -> " ++ showLambdaApply e
-
-{-
-parens :: String -> ( String, String )
-parens ( '`' : rest ) =	let
-	( f, rest2 ) = parens rest
-	( a, rest3 ) = parens rest2 in
-	( "(" ++ f ++ " " ++ a ++ ")", rest3 )
-parens ( c : rest ) = ( [ c ], rest )
--}
 
 applyI :: Lambda -> Lambda
 applyI ( Apply ( Fun p ( Var v ) ) ar )
@@ -124,19 +102,11 @@ applyI ( Apply f a )	= Apply ( applyI f ) $ applyI a
 applyI ( Fun p e )	= Fun p $ applyI e
 applyI ( Var v )	= Var v
 
-applyApp :: Lambda -> Lambda
-applyApp ( Apply ( Fun p ( Apply ( Var v ) a ) ) f )
-	| p == v	= Apply f a
-applyApp ( Apply f a )	= Apply ( applyApp f ) $ applyApp a
-applyApp ( Fun p e )	= Fun p $ applyApp e
-applyApp ( Var v )	= Var v
-
 apply :: Lambda -> Lambda
-apply lambda@( Apply fr ar ) = let
+apply ( Apply fr ar ) = let
 	newLambda = case apply fr of
 		Fun p e -> applyPara p ( apply ar ) e
 		nf	-> Apply nf ( apply ar ) in
---	if depth lambda < depth newLambda then lambda else newLambda
 	newLambda
 apply ( Fun p e ) = Fun p ( apply e )
 apply v@( Var _ ) = v
