@@ -31,7 +31,7 @@ makeFun _ _		= error "makeFun error: need 1 parameter at least"
 lambdaToSki :: Lambda -> Lambda
 lambdaToSki ( Fun x e )		= out x e
 lambdaToSki ( Apply f a )	= Apply ( lambdaToSki f ) ( lambdaToSki a )
-lambdaToSki _			= error $ "lambdaToSki error"
+lambdaToSki _			= error "lambdaToSki error"
 
 out :: String -> Lambda -> Lambda
 out _ e
