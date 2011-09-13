@@ -295,3 +295,41 @@ some one one => ( $ \l -> ( $ \r -> ( $ \r' -> some l r r' ) ) )
 ( $ some( n ) ) one == ( $ some ( n + 1 ) )
 some( n + 1 ) = \l -> ( $ \r -> some( n ) $ l r )
 some( n + 2 ) = \l -> ( $ \r -> ( $ \r' -> some( n ) $ ( l r ) r' ) )
+
+empty => ( $ I )
+zero => ( $ \f -> f s k ) => ( $ i )
+one => \c -> ( $ \l -> ( $ \r -> c $ l r ) )
+
+empty some => x ( some == ( $ x ) )
+empty one zero some => i x
+empty one some zero => x i
+
+empty zero => ( $ I ) ( $ i ) => i
+some zero => some ( $ i )
+some one zero zero => some ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ( $ i ) ( $ i )
+
+empty one => ( $ \l -> ( $ \r -> l r ) )
+empty one zero => ( $ i )
+
+empty zero => i
+empty one zero zero => i i
+empty one one zero zero zero => i i i
+empty some => i i ... i
+
+( $ I ) ( $ ( $ f ) ) ( $ x ) => ( $ f ) ( $ x ) => f x
+( $ I ) ( $ ( $ g ) ) ( $ ( $ h ) ) ( $ x ) => ( $ g ) ( $ ( $ h ) ) ( $ x ) =>
+g ( $ h ) ( $ x ) => h g ( $ x )
+
+( $ I ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) ( $ x ) ( $ y ) = x y
+( $ X ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) ( $ x ) ( $ y ) = X ( x y )
+( $ X ) ( \c -> ( $ \l -> ( $ \r -> c $ l r ) ) ) ( $ x ) =>
+( $ \l -> ( $ \r -> X $ l r ) ) ( $ x ) => ( $ \r -> X $ x r )
+
+( $ X ) one = ( $ \l -> ( $ \r -> X $ l r ) )
+( $ X ) one ( $ x ) = ( $ \r -> X $ x r )
+( $ X ) one ( $ x ) ( $ y ) = X ( x y )
+
+( $ X ) one one = ( $ \l -> ( $ \r -> X $ l r ) ) ( \c -> ... ) =>
+( $ \l -> ( $ \r -> ( $ \r' -> X $ ( l r ) r' ) ) )
+
+
