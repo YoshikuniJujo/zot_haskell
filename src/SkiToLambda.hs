@@ -63,9 +63,16 @@ readSki n ( c : cs )	= ( case c of
 readSki _ _		= error "readSki error"
 
 beta, betaKI :: Lambda -> Lambda
-beta ( fr :$: ar )	= case beta fr of
-				p :-> e	-> applyPara p ( beta ar ) e
-				nf	-> nf :$: beta ar
+beta ( fun :$: arg )	= case beta fun of
+	p :-> e	-> para p ( beta arg ) e
+	ex	-> ex :$: beta arg
+	where
+	para p a v@( Var x )	| p == x	= a
+				| otherwise	= v
+	para p a ( f :$: b )			= para p a f :$: para p a b
+	para p a f@( q :-> e )	| p == q	= f
+				| otherwise	= q :-> para p a e
+	para _ _ ki				= ki
 beta ( p :-> e )	= p :-> beta e
 beta kiv		= kiv
 
@@ -78,13 +85,3 @@ betaKI ( ( p :-> f@( q :-> Var x ) ) :$: a )
 betaKI ( f :$: a )	= betaKI f :$: betaKI a
 betaKI ( p :-> e )	= p :-> betaKI e
 betaKI kiv		= kiv
-
-applyPara :: String -> Lambda -> Lambda -> Lambda
-applyPara p a1 ( Var v )
-	| p == v		= a1
-	| otherwise		= Var v
-applyPara p a1 ( f :$: a2 )	= applyPara p a1 f :$: applyPara p a1 a2
-applyPara p1 a1 ( p2 :-> e )
-	| p1 == p2		= p2 :-> e
-	| otherwise		= p2 :-> applyPara p1 a1 e
-applyPara _ _ ki		= ki
