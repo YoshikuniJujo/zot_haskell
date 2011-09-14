@@ -1,35 +1,30 @@
 module SkiToLambda ( main ) where
 
-data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda
-	deriving Show
+import Data.List ( minimumBy )
+import Data.Ord ( comparing )
+
+data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda | I | K
+
+instance Show Lambda where
+	show I	= "I"
+	show K	= "K"
+	show e	= showLambdaTop e
 
 size :: Lambda -> Int
-size ( Var _ )		= 1
 size ( Apply f a )	= size f + size a
 size ( Fun _ e )	= 1 + size e
-
-applyToMin :: Lambda -> Lambda
-applyToMin e = minimumSize e $ take 15 $ iterate apply e
-
-minimumSize :: Lambda -> [ Lambda ] -> Lambda
-minimumSize l0 [ ]		= l0
-minimumSize l0 ( l1 : ls )
-	| size l0 < size l1	= minimumSize l0 ls
-	| otherwise		= minimumSize l1 ls
+size _			= 1
 
 main :: [ String ] -> IO ()
 main args = do
 	let rest = args
 	case rest of
-		[ ]		-> interact $ ( ++ "\n" ) . showLambdaTop' .
-			applyI .
+		[ ]		-> interact $ ( ++ "\n" ) . show . applyI .
 			applyToMin . one . readSKI 0
-		[ "-h" ]	-> interact $ unlines . devide 80 . showLambdaTop .
+		[ "-h" ]	-> interact $ unlines . devide 80 . show . toKI .
 			applyI .
 			applyToMin .
 			one . readSKI 0
-		[ "-d" ]	-> interact $ ( ++ "\n" ) . show . {- applyApp .-} applyI .
-			applyToMin . one . readSKI 0
 		_		-> error "bad arguments"
 	where
 	one ( x, _, _ ) = x
@@ -55,41 +50,34 @@ readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 		z = 'z' : show n
 readSKI _ _		= error "readSKI error"
 
-showLambda, showLambdaH, showLambdaApply, showLambdaFun, showLambdaTop,
-	showLambdaFun', showLambdaApply', showLambdaTop'
-	:: Lambda -> String
+showLambda, showLambdaFun, showLambdaApply, showLambdaTop :: Lambda -> String
 showLambda ( Var v ) = v
-showLambda ( Apply f a ) = "(" ++ showLambdaApply' f ++ " " ++ showLambda a ++ ")"
-showLambda ( Fun p e ) = "(\\" ++ p ++ showLambdaFun' e ++ ")"
-
-showLambdaFun' ( Fun p e )	= " " ++ p ++ showLambdaFun' e
-showLambdaFun' e		= " -> " ++ showLambdaApply' e
-
-showLambdaApply' ( Apply f a )	= showLambdaApply' f ++ " " ++ showLambda a
-showLambdaApply' e		= showLambda e
-
-showLambdaTop' ( Apply f a )	= showLambdaApply' f ++ " " ++ showLambda a
-showLambdaTop' ( Fun p e )	= "\\" ++ p ++ showLambdaFun' e
-showLambdaTop' v		= showLambda v
-
-showLambdaTop ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
-showLambdaTop ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
-showLambdaTop v			= showLambdaH v
-
-showLambdaH ( Var v ) = v
-showLambdaH ( Apply f a ) = "(" ++ showLambdaApply f ++ " " ++ showLambdaH a ++ ")"
-showLambdaH ( Fun p ( Var v ) )
-	| p == v	= "I"
-showLambdaH ( Fun p1 ( Fun p2 ( Var v ) ) )
-	| p1 == v	= "K"
-	| p2 == v	= "KI"
-showLambdaH ( Fun p e ) = "(\\" ++ p ++ showLambdaFun e ++ ")"
-
-showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ showLambdaH a
-showLambdaApply e		= showLambdaH e
+showLambda ( Apply f a ) = "(" ++ showLambdaApply f ++ " " ++ showLambda a ++ ")"
+showLambda ( Fun p e ) = "(\\" ++ p ++ showLambdaFun e ++ ")"
+showLambda ki		= show ki
 
 showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
-showLambdaFun e			= " -> " ++ showLambdaApply e
+showLambdaFun e		= " -> " ++ showLambdaApply e
+
+showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ showLambda a
+showLambdaApply e		= showLambda e
+
+showLambdaTop ( Apply f a )	= showLambdaApply f ++ " " ++ showLambda a
+showLambdaTop ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
+showLambdaTop v		= showLambda v
+
+toKI :: Lambda -> Lambda
+toKI ( Fun p ( Var v ) )
+	| p == v	= I
+toKI ( Fun p1 ( Fun p2 ( Var v ) ) )
+	| p1 == v	= K
+	| p2 == v	= Apply K I
+toKI ( Apply f a )	= Apply ( toKI f ) ( toKI a )
+toKI ( Fun p e )	= Fun p $ toKI e
+toKI kiv		= kiv
+
+applyToMin :: Lambda -> Lambda
+applyToMin e = minimumBy ( comparing size ) $ take 15 $ iterate apply e
 
 applyI :: Lambda -> Lambda
 applyI ( Apply ( Fun p ( Var v ) ) ar )
@@ -101,6 +89,7 @@ applyI ( Apply ( Fun p1 ( Fun p2 ( Var v ) ) ) a )
 applyI ( Apply f a )	= Apply ( applyI f ) $ applyI a
 applyI ( Fun p e )	= Fun p $ applyI e
 applyI ( Var v )	= Var v
+applyI ki		= ki
 
 apply :: Lambda -> Lambda
 apply ( Apply fr ar ) = let
@@ -110,6 +99,7 @@ apply ( Apply fr ar ) = let
 	newLambda
 apply ( Fun p e ) = Fun p ( apply e )
 apply v@( Var _ ) = v
+apply ki	= ki
 
 applyPara :: String -> Lambda -> Lambda -> Lambda
 applyPara p a1 ( Var v )
@@ -119,3 +109,4 @@ applyPara p a1 ( Apply f a2 )	= Apply ( applyPara p a1 f ) ( applyPara p a1 a2 )
 applyPara p1 a1 ( Fun p2 e )
 	| p1 == p2		= Fun p2 e
 	| otherwise		= Fun p2 $ applyPara p1 a1 e
+applyPara _ _ ki		= ki
