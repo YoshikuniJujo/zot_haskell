@@ -6,9 +6,23 @@ import Data.Ord ( comparing )
 data Lambda = Var String | Apply Lambda Lambda | Fun String Lambda | I | K
 
 instance Show Lambda where
-	show I	= "I"
-	show K	= "K"
-	show e	= showLambdaTop e
+	show ( Var v )		= v
+	show K			= "K"
+	show I			= "I"
+	show ( Apply f a )	= showLambdaApply f ++ " " ++ addParens show a
+	show ( Fun pr ex )	= "\\" ++ pr ++ showLambdaFun ex
+		where
+		showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
+		showLambdaFun e			= " -> " ++ showLambdaApply e
+
+showLambdaApply :: Lambda -> String
+showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ addParens show a
+showLambdaApply e		= addParens show e
+
+addParens :: ( Lambda -> String ) -> Lambda -> String
+addParens sh a@( Apply _ _ )	= "(" ++ sh a ++ ")" 
+addParens sh f@( Fun _ _ )	= "(" ++ sh f ++ ")"
+addParens sh e			= sh e
 
 size :: Lambda -> Int
 size ( Apply f a )	= size f + size a
@@ -49,22 +63,6 @@ readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
 		y = 'y' : show n
 		z = 'z' : show n
 readSKI _ _		= error "readSKI error"
-
-showLambda, showLambdaFun, showLambdaApply, showLambdaTop :: Lambda -> String
-showLambda ( Var v ) = v
-showLambda ( Apply f a ) = "(" ++ showLambdaApply f ++ " " ++ showLambda a ++ ")"
-showLambda ( Fun p e ) = "(\\" ++ p ++ showLambdaFun e ++ ")"
-showLambda ki		= show ki
-
-showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
-showLambdaFun e		= " -> " ++ showLambdaApply e
-
-showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ showLambda a
-showLambdaApply e		= showLambda e
-
-showLambdaTop ( Apply f a )	= showLambdaApply f ++ " " ++ showLambda a
-showLambdaTop ( Fun p e )	= "\\" ++ p ++ showLambdaFun e
-showLambdaTop v		= showLambda v
 
 toKI :: Lambda -> Lambda
 toKI ( Fun p ( Var v ) )
