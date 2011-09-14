@@ -9,20 +9,17 @@ instance Show Lambda where
 	show ( Var v )		= v
 	show K			= "K"
 	show I			= "I"
-	show ( Apply f a )	= showLambdaApply f ++ " " ++ addParens show a
-	show ( Fun pr ex )	= "\\" ++ pr ++ showLambdaFun ex
+	show ap@( Apply _ _ )	= showAp ap
 		where
-		showLambdaFun ( Fun p e )	= " " ++ p ++ showLambdaFun e
-		showLambdaFun e			= " -> " ++ showLambdaApply e
-
-showLambdaApply :: Lambda -> String
-showLambdaApply ( Apply f a )	= showLambdaApply f ++ " " ++ addParens show a
-showLambdaApply e		= addParens show e
-
-addParens :: ( Lambda -> String ) -> Lambda -> String
-addParens sh a@( Apply _ _ )	= "(" ++ sh a ++ ")" 
-addParens sh f@( Fun _ _ )	= "(" ++ sh f ++ ")"
-addParens sh e			= sh e
+		showAp ( Apply f a )	= showAp f ++ " " ++ par show a
+		showAp e		= par show e
+		par sh a@( Apply _ _ )	= "(" ++ sh a ++ ")" 
+		par sh f@( Fun _ _ )	= "(" ++ sh f ++ ")"
+		par sh e		= sh e
+	show f@( Fun _ _ )	= '\\' : showFun f
+		where
+		showFun ( Fun p e )	= p ++ " " ++ showFun e
+		showFun e		= "-> " ++ show e
 
 size :: Lambda -> Int
 size ( Apply f a )	= size f + size a
@@ -30,38 +27,31 @@ size ( Fun _ e )	= 1 + size e
 size _			= 1
 
 main :: [ String ] -> IO ()
-main args = do
-	let rest = args
-	case rest of
-		[ ]		-> interact $ ( ++ "\n" ) . show . applyI .
-			applyToMin . one . readSKI 0
-		[ "-h" ]	-> interact $ unlines . devide 80 . show . toKI .
-			applyI .
-			applyToMin .
-			one . readSKI 0
-		_		-> error "bad arguments"
+main args = interact $ case args of
+	[ ]		-> ( ++ "\n" ) . show . skiToLambda
+	[ "-h" ]	-> unlines . devide 80 . show . toKI . skiToLambda
+	_		-> error "bad arguments"
 	where
-	one ( x, _, _ ) = x
+	devide _ [ ]	= [ ]
+	devide n xs	= take n xs : devide n ( drop n xs )
 
-devide :: Int -> [ a ] -> [ [ a ] ]
-devide _ [ ]	= [ ]
-devide n xs	= take n xs : devide n ( drop n xs )
+skiToLambda :: String -> Lambda
+skiToLambda = applyI . applyToMin . ( \ ( x, _, _ ) -> x ) . readSKI 0
 
 readSKI :: Int -> String -> ( Lambda, String, Int )
-readSKI n ( '`' : rest ) = let
-	( f, rest2, n2 ) = readSKI n rest
-	( a, rest3, n3 ) = readSKI n2 rest2 in
-	( Apply f a, rest3, n3 )
+readSKI n ( '`' : rest ) = let	( f, rest2, n2 ) = readSKI n rest
+				( a, rest3, n3 ) = readSKI n2 rest2 in
+				( Apply f a, rest3, n3 )
 readSKI n ( 'i' : rest ) = ( Fun x $ Var x, rest, n + 1 )
-	where	x = 'x' : show n
+	where x = 'x' : show n
 readSKI n ( 'k' : rest ) = ( Fun x $ Fun y $ Var x, rest, n + 1 )
-	where	x = 'x' : show n
-		y = 'y' : show n
-readSKI n ( 's' : rest ) = ( Fun x $ Fun y $ Fun z $
-	Apply ( Apply ( Var x ) ( Var z ) ) ( Apply ( Var y ) ( Var z ) ), rest, n +1 )
-	where	x = 'x' : show n
-		y = 'y' : show n
-		z = 'z' : show n
+	where [ x, y ] = ( : show n ) `map` "xy"
+readSKI n ( 's' : rest ) = ( ret, rest, n + 1 )
+	where
+	ret		= fx $ fy $ fz $ Apply vx vz `Apply` Apply vy vz
+	[ fx, fy, fz ]	= Fun `map` [ x, y, z ]
+	[ vx, vy, vz ]	= Var `map` [ x, y, z ]
+	[ x, y, z ]	= ( : show n ) `map` "xyz"
 readSKI _ _		= error "readSKI error"
 
 toKI :: Lambda -> Lambda
@@ -77,6 +67,16 @@ toKI kiv		= kiv
 applyToMin :: Lambda -> Lambda
 applyToMin e = minimumBy ( comparing size ) $ take 15 $ iterate apply e
 
+apply :: Lambda -> Lambda
+apply ( Apply fr ar ) = let
+	newLambda = case apply fr of
+		Fun p e -> applyPara p ( apply ar ) e
+		nf	-> Apply nf ( apply ar ) in
+	newLambda
+apply ( Fun p e ) = Fun p ( apply e )
+apply v@( Var _ ) = v
+apply ki	= ki
+
 applyI :: Lambda -> Lambda
 applyI ( Apply ( Fun p ( Var v ) ) ar )
 	| p == v	= ar
@@ -88,16 +88,6 @@ applyI ( Apply f a )	= Apply ( applyI f ) $ applyI a
 applyI ( Fun p e )	= Fun p $ applyI e
 applyI ( Var v )	= Var v
 applyI ki		= ki
-
-apply :: Lambda -> Lambda
-apply ( Apply fr ar ) = let
-	newLambda = case apply fr of
-		Fun p e -> applyPara p ( apply ar ) e
-		nf	-> Apply nf ( apply ar ) in
-	newLambda
-apply ( Fun p e ) = Fun p ( apply e )
-apply v@( Var _ ) = v
-apply ki	= ki
 
 applyPara :: String -> Lambda -> Lambda -> Lambda
 applyPara p a1 ( Var v )
