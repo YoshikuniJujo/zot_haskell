@@ -2,7 +2,7 @@ build-type:	Simple
 cabal-version:	>= 1.6
 
 name:		zot
-version:	0.0.1
+version:	0.0.2
 stability:	experimental
 author:		Yoshikuni Jujo <PAF01143@nifty.ne.jp>
 maintainer:	Yoshikuni Jujo <PAF01143@nifty.ne.jp>
@@ -23,11 +23,11 @@ description:
   .
   And try
   .
-  > cat examples/reverse.zot | zot zotToSki | zot skiToLambda 3
+  > cat examples/reverse.zot | zot zotToSki | zot skiToLambda
   .
   and
   .
-  > cat examples/reverse.zot | zot zotToSki | zot skiToLambda 3 -h
+  > cat examples/reverse.zot | zot zotToSki | zot skiToLambda -h
 
 data-files:	examples/reverse.lambda, examples/reverse.zot, README
 
