@@ -10,7 +10,7 @@ maintainer:	Yoshikuni Jujo <PAF01143@nifty.ne.jp>
 license:	BSD3
 license-file:	LICENSE
 
-category:	Language
+category:	Compilers/Interpreters
 synopsis:	Zot language
 description:
   Zot language ( http://semarch.linguistics.fas.nyu.edu/barker/Iota/zot.html )
