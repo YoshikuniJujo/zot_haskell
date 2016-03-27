@@ -66,7 +66,7 @@ output :: IO Fun
 output = k $$< k $$< k $$< k $$< k $$< k $$ i
 
 readZot :: String -> IO Fun
-readZot = foldM ( $$ ) empty . read . filter ( `elem` "01" )
+readZot = foldM ( $$ ) empty . (read :: String -> [Fun]) . filter ( `elem` "01" )
 
 interpret :: String -> IO ()
 interpret src = readZot ( removeComment src ) >$$< output >$$ pr >> putStrLn ""

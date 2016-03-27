@@ -40,4 +40,4 @@ executable	zot
   main-is:		zot.hs
   other-modules:	Zot, LambdaToSki, SkiToLambda, SkiToZot, ZotToSki, Parse, SKI
   build-depends:	base > 3 && < 5, monads-tf
-  ghc-options:		-Wall
+  ghc-options:		-Wall -fno-warn-tabs
